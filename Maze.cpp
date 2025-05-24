@@ -11,10 +11,11 @@ Maze::Maze(const std::string& filename) : trapUsed(false) {
         std::string line;
 	srand(time(nullptr));
 
-        while(std::getline(file, line)){
+        while(std::getline(file, line)){    //Read maze from file
         	maze.push_back(line);
         }
 	file.close();
+
         rows = maze.size();
         cols = maze.empty() ? 0 : maze[0].size();
 
@@ -26,13 +27,18 @@ Maze::Maze(const std::string& filename) : trapUsed(false) {
 			}
 		}
 	}
-	int keyIdx = rand() % availablePos.size();
+
+	int keyIdx = rand() % availablePos.size();   //Initialize key
 	setTile(availablePos[keyIdx], 'K');
+	key = availablePos[keyIdx];
 	availablePos.erase(availablePos.begin() + keyIdx);
-	int trapIdx = rand() % availablePos.size();
+
+	int trapIdx = rand() % availablePos.size();   //Initialize trap
 	setTile(availablePos[trapIdx], 'T');
+	trap = availablePos[trapIdx];
 	availablePos.erase(availablePos.begin() + trapIdx);
-	int exitIdx = rand() % availablePos.size();
+
+	int exitIdx = rand() % availablePos.size();   //Initialize exit
 	setTile(availablePos[exitIdx], 'L');
 	exit = availablePos[exitIdx];
 }
@@ -44,49 +50,50 @@ void Maze::drawMaze() const{
 	refresh();
 }
 
+bool Maze::isValid(const Position& _pos) const{     //Function for checking the position
+	return _pos.y >= 0 && _pos.y < maze.size() && _pos.x >= 0 && _pos.x < maze[_pos.y].size();
+}
+
 void Maze::setTile(const Position& _pos, char ch){
-	if(_pos.y >= 0 && _pos.y < maze.size() && _pos.x >= 0 && maze[_pos.y].size()){
+	if(isValid(_pos)){
 		maze[_pos.y][_pos.x] = ch;
 	}
 }
 
 bool Maze::areNeighbors(const Position& pos1, const Position& pos2) const{
-	if(std::abs(pos1.x - pos2.x) <= 1 && std::abs(pos1.y - pos2.y) <= 1){
-		return true;
-	}
-	return false;
+	return std::abs(pos1.x - pos2.x) <= 1 && std::abs(pos1.y - pos2.y) <= 1;
 }
 
 bool Maze::isWall(const Position& _pos) const{
-	if(_pos.y < 0 || _pos.y >= maze.size() || _pos.x < 0 || _pos.x >= maze[_pos.y].size()){
+	if(!isValid(_pos)){
 		return true;
 	}
 	return maze[_pos.y][_pos.x] == '#';
 }
 
 bool Maze::isEmpty(const Position& _pos) const{
-	if(_pos.y < 0 || _pos.y >= maze.size() || _pos.x < 0 || _pos.x >= maze[_pos.y].size()){
+	if(!isValid(_pos)){
                 return false;
         }
-        return maze[_pos.y][_pos.x] == ' ';
+	return maze[_pos.y][_pos.x] == ' ';
 }
 
 bool Maze::isExit(const Position& _pos) const{
-	if(_pos.y < 0 || _pos.y >= maze.size() || _pos.x < 0 || _pos.x >= maze[_pos.y].size()){
+	if(!isValid(_pos)){
 		return false;
 	}
 	return maze[_pos.y][_pos.x] == 'L';
 }
 
 bool Maze::isKey(const Position& _pos) const{
-	if(_pos.y < 0 || _pos.y >= maze.size() || _pos.x < 0 || _pos.x >= maze[_pos.y].size()){
+	if(!isValid(_pos)){
 		return false;
 	}
 	return maze[_pos.y][_pos.x] == 'K';
 }
 
 bool Maze::isTrap(const Position& _pos) const{
-	if(_pos.y < 0 || _pos.y >= maze.size() || _pos.x < 0 || _pos.x >= maze[_pos.y].size()){
+	if(!isValid(_pos)){
 		return false;
 	}
 	return maze[_pos.y][_pos.x] == 'T' && !trapUsed;

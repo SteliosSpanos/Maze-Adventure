@@ -14,4 +14,5 @@ public:
 	void destroyMaze(Maze& maze);
 	void run();
 	void displayTime(const Maze& maze, unsigned int time) const;
+	void gameOver(const Maze& maze) const;
 };

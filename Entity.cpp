@@ -35,6 +35,15 @@ void Entity::moveToExit(const Maze& maze, const Position& exit){
 	}
 }
 
+void Entity::resetVisited(){
+	for(int i = 0; i < visited.size(); i++){
+		for(int j = 0; j < visited[i].size(); j++){
+			visited[i][j] = false;
+		}
+	}
+	visited[pos.y][pos.x] = true;
+}
+
 Position Entity::getPosition() const{
 	return pos;
 }

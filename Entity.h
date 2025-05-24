@@ -15,13 +15,17 @@ protected:
 public:
 	Entity();
 	Entity(const Maze& maze, const Position& _pos);
+
 	virtual void move(const Maze& maze) = 0;
 	virtual void moveToNext(const Position& newPos) = 0;
 	void moveToExit(const Maze& maze, const Position& exit);
+
 	bool carriesKey() const;
 	void pickupKey();
 	void useKey();
 	bool isTrapped() const;
 	void setTrapped(bool t);
 	Position getPosition() const;
+
+	void resetVisited();
 };

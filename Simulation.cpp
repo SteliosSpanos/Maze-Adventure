@@ -15,6 +15,7 @@ Simulation::Simulation(const std::string& filename) : maze(filename), met(false)
 		y1 = rand() % maze.getHeight();
 	}while(maze.isWall(Position(x1, y1)));
 	g = Grigorakis(maze, Position(x1, y1));
+
 	int x2, y2;
 	do{
 		x2 = rand() % maze.getWidth();
@@ -25,9 +26,10 @@ Simulation::Simulation(const std::string& filename) : maze(filename), met(false)
 
 void Simulation::destroyMaze(Maze& maze){
 	for(int y = 1; y < maze.getHeight() - 2; y++){
-		for(int x = 1; x < maze.getWidth() - 2; x++){
-			if(maze.isWall(Position(x, y)) || maze.isTrap(Position(x, y))){
-				maze.setTile(Position(x, y), ' ');
+		for(int x = 1; x < maze.getWidth() - 1; x++){
+			Position toDestroy(x, y);
+			if(maze.isWall(toDestroy) || maze.isTrap(toDestroy)){
+				maze.setTile(toDestroy, ' ');
 				mvaddch(y, x, ' ');
 			}
 		}
@@ -40,22 +42,27 @@ void Simulation::run(){
 	initscr();
 	noecho();
 	curs_set(0);
-	unsigned int tries = 1000;
+	unsigned int tries = 200;
+
 	while(!met){
 		if(tries == 0){
+			gameOver(maze);
+			getch();
 			endwin();
 			return;
 		}
 		clear();
 		maze.drawMaze();
 		displayTime(maze, tries);
-		if(!g.isTrapped()){
+
+		if(!g.isTrapped()){    //If the charctecter is trapped it doesnt move
 			g.move(maze);
 		}
 		if(!a.isTrapped()){
 			a.move(maze);
 		}
-		if(maze.isKey(g.getPosition())){
+
+		if(maze.isKey(g.getPosition())){   //The character picks up the key
 			g.pickupKey();
 			maze.setTile(g.getPosition(), ' ');
 		}
@@ -63,10 +70,13 @@ void Simulation::run(){
 			a.pickupKey();
 			maze.setTile(a.getPosition(), ' ');
 		}
+
 		if(maze.isTrap(g.getPosition())){
 			g.setTrapped(true);
 			maze.useTrap();
 			if(g.carriesKey()){
+				gameOver(maze);
+				getch();
 				endwin();
 				return;
 			}
@@ -75,14 +85,18 @@ void Simulation::run(){
 			a.setTrapped(true);
 			maze.useTrap();
 			if(a.carriesKey()){
+				gameOver(maze);
+				getch();
 				endwin();
 				return;
 			}
 		}
+
 		refresh();
 		usleep(200000);
-		if(maze.areNeighbors(g.getPosition(), a.getPosition())){
-			if(g.isTrapped() && a.carriesKey()){
+
+		if(maze.areNeighbors(g.getPosition(), a.getPosition())){   //If the character are neighbors they can
+			if(g.isTrapped() && a.carriesKey()){               //only meet under these conditions
 				g.setTrapped(false);
 				a.useKey();
 				met = true;
@@ -98,7 +112,9 @@ void Simulation::run(){
 		}
 		tries--;
 	}
-	destroyMaze(maze);
+
+	destroyMaze(maze);   //Destroy the maze cinematically
+
 	while(!maze.areNeighbors(g.getPosition(), maze.getExit()) && !maze.areNeighbors(a.getPosition(), maze.getExit())){
 		maze.drawMaze();
 		a.moveToExit(maze, maze.getExit());
@@ -112,4 +128,8 @@ void Simulation::run(){
 void Simulation::displayTime(const Maze& maze, unsigned int time) const{
 	mvprintw((maze.getHeight() / 2) - 1, maze.getWidth() + 20, "Time Remaining:");
 	mvprintw(maze.getHeight() / 2, maze.getWidth() + 20, "%d", time);
+}
+
+void Simulation::gameOver(const Maze& maze) const{
+	mvprintw(maze.getHeight() + 5, maze.getWidth() / 2, "GAME OVER");
 }

@@ -10,8 +10,7 @@ Asimenia::Asimenia(const Maze& maze, const Position& _pos) : Entity(maze, _pos) 
 
 void Asimenia::moveToNext(const Position& newPos){
 	mvaddch(pos.y, pos.x, ' ');
-	pos.x = newPos.x;
-	pos.y = newPos.y;
+	pos = newPos;
 	mvaddch(pos.y, pos.x, 'A');
 }
 
@@ -22,15 +21,16 @@ void Asimenia::move(const Maze& maze){
 	for(int i = 0; i < 4; i++){
 		int newx = pos.x + dx[i];
 		int newy = pos.y + dy[i];
-		if((maze.isEmpty(Position(newx,newy)) || maze.isTrap(Position(newx, newy)) || maze.isKey(Position(newx, newy))) && !visited[newy][newx]){
-			neighbors.emplace_back(newx, newy);
+		Position newPos(newx, newy);
+		if((maze.isEmpty(newPos) || maze.isTrap(newPos) || maze.isKey(newPos)) && !visited[newy][newx]){
+			neighbors.emplace_back(newPos);
 		}
 	}
 	if(!neighbors.empty()){
 		Position next = neighbors[0];
 		moveToNext(next);
 		visited[pos.y][pos.x] = true;
-		path.push({pos.x, pos.y});
+		path.push(pos);
 	}
 	else{
 		if(!path.empty()){
@@ -39,12 +39,7 @@ void Asimenia::move(const Maze& maze){
 			moveToNext(back);
 		}
 		else{
-			for(int i = 0; i < visited.size(); i++){
-				for(int j = 0; j < visited[i].size(); j++){
-					visited[i][j] = false;
-				}
-			}
-			visited[pos.y][pos.x] = true;
+			resetVisited();
 		}
 	}
 }
