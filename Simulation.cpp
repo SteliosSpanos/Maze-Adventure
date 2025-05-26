@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <cmath>
 
-Simulation::Simulation(const std::string& filename) : maze(filename), met(false) {
+Simulation::Simulation(const std::string& filename) : maze(filename), met(false), rounds(1000) {
 	srand(time(nullptr));
 	int x1, y1;
 	do{
@@ -28,7 +28,7 @@ void Simulation::destroyMaze(Maze& maze){
 	for(int y = 1; y < maze.getHeight() - 2; y++){
 		for(int x = 1; x < maze.getWidth() - 1; x++){
 			Position toDestroy(x, y);
-			if(maze.isWall(toDestroy) || maze.isTrap(toDestroy)){
+			if(maze.isWall(toDestroy) || maze.isTrap(toDestroy) || maze.isKey(toDestroy)){
 				maze.setTile(toDestroy, ' ');
 				mvaddch(y, x, ' ');
 			}
@@ -42,10 +42,9 @@ void Simulation::run(){
 	initscr();
 	noecho();
 	curs_set(0);
-	unsigned int tries = 200;
 
 	while(!met){
-		if(tries == 0){
+		if(rounds == 0){
 			gameOver(maze);
 			getch();
 			endwin();
@@ -53,7 +52,7 @@ void Simulation::run(){
 		}
 		clear();
 		maze.drawMaze();
-		displayTime(maze, tries);
+		displayTime(maze, rounds);
 
 		if(!g.isTrapped()){    //If the charctecter is trapped it doesnt move
 			g.move(maze);
@@ -73,7 +72,7 @@ void Simulation::run(){
 
 		if(maze.isTrap(g.getPosition())){
 			g.setTrapped(true);
-			maze.useTrap();
+			maze.useTrap(g.getPosition());
 			if(g.carriesKey()){
 				gameOver(maze);
 				getch();
@@ -83,13 +82,20 @@ void Simulation::run(){
 		}
 		if(maze.isTrap(a.getPosition())){
 			a.setTrapped(true);
-			maze.useTrap();
+			maze.useTrap(a.getPosition());
 			if(a.carriesKey()){
 				gameOver(maze);
 				getch();
 				endwin();
 				return;
 			}
+		}
+
+		if(a.isTrapped() && g.isTrapped()){
+			gameOver(maze);
+			getch();
+			endwin();
+			return;
 		}
 
 		refresh();
@@ -110,7 +116,7 @@ void Simulation::run(){
 				met = true;
 			}
 		}
-		tries--;
+		rounds--;
 	}
 
 	destroyMaze(maze);   //Destroy the maze cinematically
@@ -131,5 +137,5 @@ void Simulation::displayTime(const Maze& maze, unsigned int time) const{
 }
 
 void Simulation::gameOver(const Maze& maze) const{
-	mvprintw(maze.getHeight() + 5, maze.getWidth() / 2, "GAME OVER");
+	mvprintw(maze.getHeight() + 5, maze.getWidth(), "GAME OVER");
 }

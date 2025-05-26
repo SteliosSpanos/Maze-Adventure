@@ -7,7 +7,7 @@
 
 Entity::Entity() {}
 
-Entity::Entity(const Maze& maze, const Position& _pos) : hasKey(false), trapped(false), pos(_pos) {
+Entity::Entity(const Maze& maze, const Position& p) : hasKey(false), trapped(false), pos(p) {
 	visited.resize(maze.getHeight(), std::vector<bool>(maze.getWidth(), false));
 	visited[pos.y][pos.x] = true;
 }
@@ -35,6 +35,32 @@ void Entity::moveToExit(const Maze& maze, const Position& exit){
 	}
 }
 
+void Entity::pushPath(const Position& p){
+	path.push(p);
+}
+
+void Entity::popPath(){
+	if(!path.empty()){
+		path.pop();
+	}
+}
+
+bool Entity::isPathEmpty() const{
+	return path.empty();
+}
+
+Position Entity::getPathTop() const{
+	return path.top();
+}
+
+void Entity::setVisited(const Position& p, bool value){
+	visited[p.y][p.x] = value;
+}
+
+bool Entity::isVisited(const Position& p) const{
+	return visited[p.y][p.x];
+}
+
 void Entity::resetVisited(){
 	for(int i = 0; i < visited.size(); i++){
 		for(int j = 0; j < visited[i].size(); j++){
@@ -46,6 +72,10 @@ void Entity::resetVisited(){
 
 Position Entity::getPosition() const{
 	return pos;
+}
+
+void Entity::setPosition(const Position& p){
+	pos = p;
 }
 
 bool Entity::carriesKey() const{

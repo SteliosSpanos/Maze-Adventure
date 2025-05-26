@@ -6,7 +6,7 @@
 #include <fstream>
 #include <algorithm>
 
-Maze::Maze(const std::string& filename) : trapUsed(false) {
+Maze::Maze(const std::string& filename) : trapUsed(false), trap2Used(false) {
 	std::ifstream file(filename);
         std::string line;
 	srand(time(nullptr));
@@ -33,10 +33,15 @@ Maze::Maze(const std::string& filename) : trapUsed(false) {
 	key = availablePos[keyIdx];
 	availablePos.erase(availablePos.begin() + keyIdx);
 
-	int trapIdx = rand() % availablePos.size();   //Initialize trap
-	setTile(availablePos[trapIdx], 'T');
+	int trapIdx = rand() % availablePos.size();   //Initialize traps
+	setTile(availablePos[trapIdx], 'C');
 	trap = availablePos[trapIdx];
 	availablePos.erase(availablePos.begin() + trapIdx);
+
+	int trap2Idx = rand() % availablePos.size();
+	setTile(availablePos[trap2Idx], 'C');
+	trap2 = availablePos[trap2Idx];
+	availablePos.erase(availablePos.begin() + trap2Idx);
 
 	int exitIdx = rand() % availablePos.size();   //Initialize exit
 	setTile(availablePos[exitIdx], 'L');
@@ -50,57 +55,62 @@ void Maze::drawMaze() const{
 	refresh();
 }
 
-bool Maze::isValid(const Position& _pos) const{     //Function for checking the position
-	return _pos.y >= 0 && _pos.y < maze.size() && _pos.x >= 0 && _pos.x < maze[_pos.y].size();
+bool Maze::isValid(const Position& p) const{     //Function for checking the position
+	return p.y >= 0 && p.y < maze.size() && p.x >= 0 && p.x < maze[p.y].size();
 }
 
-void Maze::setTile(const Position& _pos, char ch){
-	if(isValid(_pos)){
-		maze[_pos.y][_pos.x] = ch;
+void Maze::setTile(const Position& p, char ch){
+	if(isValid(p)){
+		maze[p.y][p.x] = ch;
 	}
 }
 
-bool Maze::areNeighbors(const Position& pos1, const Position& pos2) const{
-	return std::abs(pos1.x - pos2.x) <= 1 && std::abs(pos1.y - pos2.y) <= 1;
+bool Maze::areNeighbors(const Position& p1, const Position& p2) const{
+	return std::abs(p1.x - p2.x) <= 1 && std::abs(p1.y - p2.y) <= 1;
 }
 
-bool Maze::isWall(const Position& _pos) const{
-	if(!isValid(_pos)){
+bool Maze::isWall(const Position& p) const{
+	if(!isValid(p)){
 		return true;
 	}
-	return maze[_pos.y][_pos.x] == '#';
+	return maze[p.y][p.x] == '*';
 }
 
-bool Maze::isEmpty(const Position& _pos) const{
-	if(!isValid(_pos)){
+bool Maze::isEmpty(const Position& p) const{
+	if(!isValid(p)){
                 return false;
         }
-	return maze[_pos.y][_pos.x] == ' ';
+	return maze[p.y][p.x] == ' ';
 }
 
-bool Maze::isExit(const Position& _pos) const{
-	if(!isValid(_pos)){
+bool Maze::isExit(const Position& p) const{
+	if(!isValid(p)){
 		return false;
 	}
-	return maze[_pos.y][_pos.x] == 'L';
+	return p == exit;
 }
 
-bool Maze::isKey(const Position& _pos) const{
-	if(!isValid(_pos)){
+bool Maze::isKey(const Position& p) const{
+	if(!isValid(p)){
 		return false;
 	}
-	return maze[_pos.y][_pos.x] == 'K';
+	return p == key;
 }
 
-bool Maze::isTrap(const Position& _pos) const{
-	if(!isValid(_pos)){
+bool Maze::isTrap(const Position& p) const{
+	if(!isValid(p)){
 		return false;
 	}
-	return maze[_pos.y][_pos.x] == 'T' && !trapUsed;
+	return (p == trap && !trapUsed) || (p == trap2 && !trap2Used);
 }
 
-void Maze::useTrap(){
-	trapUsed = true;
+void Maze::useTrap(const Position& p){
+	if(p == trap){
+		trapUsed = true;
+	}
+	else if(p == trap2){
+		trap2Used = true;
+	}
 }
 
 int Maze::getHeight() const{
@@ -121,6 +131,10 @@ Position Maze::getKey() const{
 
 Position Maze::getTrap() const{
 	return trap;
+}
+
+Position Maze::getTrap2() const{
+	return trap2;
 }
 
 

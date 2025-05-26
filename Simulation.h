@@ -9,6 +9,7 @@ private:
 	Grigorakis g;
 	Asimenia a;
 	bool met;
+	unsigned int rounds;
 public:
 	Simulation(const std::string& filename);
 	void destroyMaze(Maze& maze);
