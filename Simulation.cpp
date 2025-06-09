@@ -1,10 +1,9 @@
+
 #include "Simulation.h"
-#include "Grigorakis.h"
-#include "Asimenia.h"
-#include <ncurses.h>
-#include <cstdlib>
-#include <ctime>
 #include <unistd.h>
+#include <ctime>
+#include <cstdlib>
+#include <ncurses.h>
 #include <cmath>
 
 Simulation::Simulation(const std::string& filename) : maze(filename), met(false), rounds(1000) {
@@ -24,8 +23,8 @@ Simulation::Simulation(const std::string& filename) : maze(filename), met(false)
 	a = Asimenia(maze, Position(x2, y2));
 }
 
-void Simulation::destroyMaze(Maze& maze){
-	for(int y = 1; y < maze.getHeight() - 2; y++){
+void Simulation::destroyMaze(Maze& maze) {
+	for(int y = 1; y < maze.getHeight() - 1; y++){
 		for(int x = 1; x < maze.getWidth() - 1; x++){
 			Position toDestroy(x, y);
 			if(maze.isWall(toDestroy) || maze.isTrap(toDestroy) || maze.isKey(toDestroy)){
@@ -38,10 +37,24 @@ void Simulation::destroyMaze(Maze& maze){
 	}
 }
 
-void Simulation::run(){
+void Simulation::headToExit() {
+	 while(!maze.areNeighbors(g.getPosition(), maze.getExit()) && !maze.areNeighbors(a.getPosition(), maze.getExit())){
+                maze.drawMaze();
+                a.moveTo(maze, maze.getExit());
+                g.moveTo(maze, maze.getExit());
+                refresh();
+                usleep(200000);
+        }
+}
+
+void Simulation::run() {
 	initscr();
+	start_color();
 	noecho();
 	curs_set(0);
+
+	init_pair(1, COLOR_MAGENTA, COLOR_BLACK);
+	init_pair(2, COLOR_GREEN, COLOR_BLACK);
 
 	while(!met){
 		if(rounds == 0){
@@ -52,90 +65,94 @@ void Simulation::run(){
 		}
 		clear();
 		maze.drawMaze();
-		displayTime(maze, rounds);
 
-		if(!g.isTrapped()){    //If the charctecter is trapped it doesnt move
-			g.move(maze);
-		}
-		if(!a.isTrapped()){
-			a.move(maze);
-		}
+		if(!g.isTrapped()){
+                	g.move(maze);
+        	}
+        	if(!a.isTrapped()){
+                	a.move(maze);
+        	}
 
-		if(maze.isKey(g.getPosition())){   //The character picks up the key
+        	if(maze.areNeighbors(g.getPosition(), maze.getKey())){
+			g.resetVisited();
 			g.pickupKey();
 			maze.setTile(g.getPosition(), ' ');
-		}
-		if(maze.isKey(a.getPosition())){
+        	}
+        	if(maze.areNeighbors(a.getPosition(), maze.getKey())){
+			a.resetVisited();
 			a.pickupKey();
 			maze.setTile(a.getPosition(), ' ');
-		}
+        	}
 
-		if(maze.isTrap(g.getPosition())){
-			g.setTrapped(true);
-			maze.useTrap(g.getPosition());
-			if(g.carriesKey()){
+        	if(maze.isTrap(g.getPosition())){
+                	g.setTrapped(true);
+                	maze.useTrap(g.getPosition());
+                	if(g.carriesKey()){
 				gameOver(maze);
 				getch();
 				endwin();
-				return;
-			}
-		}
-		if(maze.isTrap(a.getPosition())){
-			a.setTrapped(true);
-			maze.useTrap(a.getPosition());
-			if(a.carriesKey()){
+                        	return;
+                	}
+        	}
+        	if(maze.isTrap(a.getPosition())){
+                	a.setTrapped(true);
+                	maze.useTrap(a.getPosition());
+                	if(a.carriesKey()){
 				gameOver(maze);
 				getch();
 				endwin();
-				return;
-			}
-		}
+                        	return;
+                	}
+        	}
 
-		if(a.isTrapped() && g.isTrapped()){
+        	if(a.isTrapped() && g.isTrapped()){
 			gameOver(maze);
 			getch();
 			endwin();
-			return;
+                	return;
+        	}
+
+		if(maze.areNeighbors(g.getPosition(), a.getPosition())){
+			if(!g.isTrapped() && !a.isTrapped()){
+				met = true;
+			}
+			else if(g.isTrapped() && !a.isTrapped()){
+				if(a.carriesKey()){
+					a.useKey();
+					g.setTrapped(false);
+					met = true;
+				}
+			}
+			else if(a.isTrapped() && !g.isTrapped()){
+				if(g.carriesKey()){
+					g.useKey();
+					a.setTrapped(false);
+					met = true;
+				}
+			}
 		}
+		displayTime(maze, rounds);
 
 		refresh();
-		usleep(200000);
-
-		if(maze.areNeighbors(g.getPosition(), a.getPosition())){   //If the character are neighbors they can
-			if(g.isTrapped() && a.carriesKey()){               //only meet under these conditions
-				g.setTrapped(false);
-				a.useKey();
-				met = true;
-			}
-			else if(a.isTrapped() && g.carriesKey()){
-				a.setTrapped(false);
-				g.useKey();
-				met = true;
-			}
-			else if(!g.isTrapped() && !a.isTrapped()){
-				met = true;
-			}
-		}
+		usleep(100000);
 		rounds--;
 	}
 
 	destroyMaze(maze);   //Destroy the maze cinematically
 
-	while(!maze.areNeighbors(g.getPosition(), maze.getExit()) && !maze.areNeighbors(a.getPosition(), maze.getExit())){
-		maze.drawMaze();
-		a.moveToExit(maze, maze.getExit());
-		g.moveToExit(maze, maze.getExit());
-		refresh();
-		usleep(200000);
-	}
+	headToExit();
 	endwin();
 }
 
-void Simulation::displayTime(const Maze& maze, unsigned int time) const{
+void Simulation::displayTime(const Maze& maze, unsigned int time) const {
+	attron(COLOR_PAIR(1));
 	mvprintw((maze.getHeight() / 2) - 1, maze.getWidth() + 20, "Time Remaining:");
 	mvprintw(maze.getHeight() / 2, maze.getWidth() + 20, "%d", time);
+	attroff(COLOR_PAIR(1));
 }
 
-void Simulation::gameOver(const Maze& maze) const{
-	mvprintw(maze.getHeight() + 5, maze.getWidth(), "GAME OVER");
+void Simulation::gameOver(const Maze& maze) const {
+	attron(COLOR_PAIR(1));
+	mvprintw(maze.getHeight() + 2, maze.getWidth() / 2, "GAME OVER");
+	attroff(COLOR_PAIR(1));
 }

@@ -13,6 +13,7 @@ private:
 public:
 	Simulation(const std::string& filename);
 	void destroyMaze(Maze& maze);
+	void headToExit();
 	void run();
 	void displayTime(const Maze& maze, unsigned int time) const;
 	void gameOver(const Maze& maze) const;

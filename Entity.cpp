@@ -12,18 +12,18 @@ Entity::Entity(const Maze& maze, const Position& p) : hasKey(false), trapped(fal
 	visited[pos.y][pos.x] = true;
 }
 
-void Entity::moveToExit(const Maze& maze, const Position& exit){
+void Entity::moveTo(const Maze& maze, const Position& p) {
 	const int dx[] = {0, 0, -1, 1};
 	const int dy[] = {1, -1, 0, 0};
-	Position current = getPosition();
+	Position current = pos;
 	Position optimalMove = current;
-	int minDistance = std::abs(exit.x - current.x) + std::abs(exit.y - current.y);
+	int minDistance = std::abs(p.x - current.x) + std::abs(p.y - current.y);
 	for(int i = 0; i < 4; i++){
 		int newx = pos.x + dx[i];
 		int newy = pos.y + dy[i];
 		Position neighbor(newx, newy);
 		if(!maze.isWall(neighbor)){
-			int distance = std::abs(exit.x - newx) + std::abs(exit.y - newy);
+			int distance = std::abs(p.x - newx) + std::abs(p.y - newy);
 			if(distance < minDistance){
 				minDistance = distance;
 				optimalMove = neighbor;
@@ -35,33 +35,33 @@ void Entity::moveToExit(const Maze& maze, const Position& exit){
 	}
 }
 
-void Entity::pushPath(const Position& p){
+void Entity::pushPath(const Position& p) {
 	path.push(p);
 }
 
-void Entity::popPath(){
+void Entity::popPath() {
 	if(!path.empty()){
 		path.pop();
 	}
 }
 
-bool Entity::isPathEmpty() const{
+bool Entity::isPathEmpty() const {
 	return path.empty();
 }
 
-Position Entity::getPathTop() const{
+Position Entity::getPathTop() const {
 	return path.top();
 }
 
-void Entity::setVisited(const Position& p, bool value){
+void Entity::setVisited(const Position& p, bool value) {
 	visited[p.y][p.x] = value;
 }
 
-bool Entity::isVisited(const Position& p) const{
+bool Entity::isVisited(const Position& p) const {
 	return visited[p.y][p.x];
 }
 
-void Entity::resetVisited(){
+void Entity::resetVisited() {
 	for(int i = 0; i < visited.size(); i++){
 		for(int j = 0; j < visited[i].size(); j++){
 			visited[i][j] = false;
@@ -70,30 +70,30 @@ void Entity::resetVisited(){
 	visited[pos.y][pos.x] = true;
 }
 
-Position Entity::getPosition() const{
+Position Entity::getPosition() const {
 	return pos;
 }
 
-void Entity::setPosition(const Position& p){
+void Entity::setPosition(const Position& p) {
 	pos = p;
 }
 
-bool Entity::carriesKey() const{
+bool Entity::carriesKey() const {
 	return hasKey;
 }
 
-void Entity::pickupKey(){
+void Entity::pickupKey() {
 	hasKey = true;
 }
 
-void Entity::useKey(){
+void Entity::useKey() {
 	hasKey = false;
 }
 
-bool Entity::isTrapped() const{
+bool Entity::isTrapped() const {
 	return trapped;
 }
 
-void Entity::setTrapped(bool t){
+void Entity::setTrapped(bool t) {
 	trapped = t;
 }

@@ -16,7 +16,7 @@ Maze::Maze(const std::string& filename) : trapUsed(false), trap2Used(false) {
         }
 	file.close();
 
-        rows = maze.size();
+        rows = maze.size();     //Initialize columns and rows
         cols = maze.empty() ? 0 : maze[0].size();
 
 	std::vector<Position> availablePos;
@@ -48,63 +48,65 @@ Maze::Maze(const std::string& filename) : trapUsed(false), trap2Used(false) {
 	exit = availablePos[exitIdx];
 }
 
-void Maze::drawMaze() const{
+void Maze::drawMaze() const {
 	for(size_t y = 0; y < maze.size(); y++){
+		attron(COLOR_PAIR(1));
 		mvprintw(y, 0, "%s", maze[y].c_str());
+		attroff(COLOR_PAIR(1));
 	}
 	refresh();
 }
 
-bool Maze::isValid(const Position& p) const{     //Function for checking the position
+bool Maze::isValid(const Position& p) const {     //Function for checking the position
 	return p.y >= 0 && p.y < maze.size() && p.x >= 0 && p.x < maze[p.y].size();
 }
 
-void Maze::setTile(const Position& p, char ch){
+void Maze::setTile(const Position& p, char ch) {    //Function for changing a tile
 	if(isValid(p)){
 		maze[p.y][p.x] = ch;
 	}
 }
 
-bool Maze::areNeighbors(const Position& p1, const Position& p2) const{
+bool Maze::areNeighbors(const Position& p1, const Position& p2) const {    //Function to check if two tiles are neighbors
 	return std::abs(p1.x - p2.x) <= 1 && std::abs(p1.y - p2.y) <= 1;
 }
 
-bool Maze::isWall(const Position& p) const{
+bool Maze::isWall(const Position& p) const {
 	if(!isValid(p)){
 		return true;
 	}
 	return maze[p.y][p.x] == '*';
 }
 
-bool Maze::isEmpty(const Position& p) const{
+bool Maze::isEmpty(const Position& p) const {
 	if(!isValid(p)){
                 return false;
         }
 	return maze[p.y][p.x] == ' ';
 }
 
-bool Maze::isExit(const Position& p) const{
+bool Maze::isExit(const Position& p) const {
 	if(!isValid(p)){
 		return false;
 	}
 	return p == exit;
 }
 
-bool Maze::isKey(const Position& p) const{
+bool Maze::isKey(const Position& p) const {
 	if(!isValid(p)){
 		return false;
 	}
 	return p == key;
 }
 
-bool Maze::isTrap(const Position& p) const{
+bool Maze::isTrap(const Position& p) const {
 	if(!isValid(p)){
 		return false;
 	}
 	return (p == trap && !trapUsed) || (p == trap2 && !trap2Used);
 }
 
-void Maze::useTrap(const Position& p){
+void Maze::useTrap(const Position& p) {
 	if(p == trap){
 		trapUsed = true;
 	}
@@ -113,27 +115,27 @@ void Maze::useTrap(const Position& p){
 	}
 }
 
-int Maze::getHeight() const{
+int Maze::getHeight() const {
 	return rows;
 }
 
-int Maze::getWidth() const{
+int Maze::getWidth() const {
 	return cols;
 }
 
-Position Maze::getExit() const{
+Position Maze::getExit() const {
 	return exit;
 }
 
-Position Maze::getKey() const{
+Position Maze::getKey() const {
 	return key;
 }
 
-Position Maze::getTrap() const{
+Position Maze::getTrap() const {
 	return trap;
 }
 
-Position Maze::getTrap2() const{
+Position Maze::getTrap2() const {
 	return trap2;
 }
 

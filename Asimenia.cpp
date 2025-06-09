@@ -1,4 +1,3 @@
-#include "Grigorakis.h"
 #include "Asimenia.h"
 #include <ncurses.h>
 #include <cstdlib>
@@ -6,15 +5,17 @@
 
 Asimenia::Asimenia() : Entity() {}
 
-Asimenia::Asimenia(const Maze& maze, const Position& _pos) : Entity(maze, _pos) {}
+Asimenia::Asimenia(const Maze& maze, const Position& p) : Entity(maze, p) {}
 
-void Asimenia::moveToNext(const Position& newPos){
+void Asimenia::moveToNext(const Position& newPos) {
 	mvaddch(getPosition().y, getPosition().x, ' ');
 	setPosition(newPos);
+	attron(COLOR_PAIR(2));
 	mvaddch(getPosition().y, getPosition().x, 'A');
+	attroff(COLOR_PAIR(2));
 }
 
-void Asimenia::move(const Maze& maze){
+void Asimenia::move(const Maze& maze) {
 	const int dx[] = {0, 0, 1, -1};
 	const int dy[] = {1, -1, 0, 0};
 	std::vector<Position> neighbors;

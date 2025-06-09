@@ -1,5 +1,4 @@
 #include "Grigorakis.h"
-#include "Asimenia.h"
 #include <ncurses.h>
 #include <cstdlib>
 #include <vector>
@@ -8,13 +7,15 @@ Grigorakis::Grigorakis() : Entity() {}
 
 Grigorakis::Grigorakis(const Maze& maze, const Position& _pos) : Entity(maze, _pos) {}
 
-void Grigorakis::moveToNext(const Position& newPos){
+void Grigorakis::moveToNext(const Position& newPos) {
 	mvaddch(getPosition().y, getPosition().x, ' ');
-	setPosition(newPos);     //No '=' overloading needed
+	setPosition(newPos);
+	attron(COLOR_PAIR(2));
 	mvaddch(getPosition().y, getPosition().x, 'G');
+	attroff(COLOR_PAIR(2));
 }
 
-void Grigorakis::move(const Maze& maze){
+void Grigorakis::move(const Maze& maze) {
 	const int dx[] = {0, 0, -1, 1};
 	const int dy[] = {-1, 1, 0, 0};
 	std::vector<Position> neighbors;

@@ -18,7 +18,7 @@ public:
 
 	virtual void move(const Maze& maze) = 0;
 	virtual void moveToNext(const Position& newPos) = 0;
-	void moveToExit(const Maze& maze, const Position& exit);
+	void moveTo(const Maze& maze, const Position& p);
 
 	void pushPath(const Position& p);
 	void popPath();
@@ -31,8 +31,10 @@ public:
 	bool carriesKey() const;
 	void pickupKey();
 	void useKey();
+
 	bool isTrapped() const;
 	void setTrapped(bool t);
+
 	void setPosition(const Position& p);
 	Position getPosition() const;
 
