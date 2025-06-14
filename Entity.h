@@ -1,5 +1,4 @@
 #pragma once
-
 #include <stack>
 #include <vector>
 #include "Maze.h"
@@ -15,9 +14,12 @@ private:
 public:
 	Entity();
 	Entity(const Maze& maze, const Position& p);
+	virtual ~Entity() = default;
 
 	virtual void move(const Maze& maze) = 0;
 	virtual void moveToNext(const Position& newPos) = 0;
+	virtual void displayHasKey(const Maze& maze) const = 0;
+	virtual void displayIsTrapped(const Maze& maze) const = 0;
 	void moveTo(const Maze& maze, const Position& p);
 
 	void pushPath(const Position& p);

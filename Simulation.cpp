@@ -1,4 +1,3 @@
-
 #include "Simulation.h"
 #include <unistd.h>
 #include <ctime>
@@ -33,7 +32,7 @@ void Simulation::destroyMaze(Maze& maze) {
 			}
 		}
 		refresh();
-		usleep(500000);
+		usleep(400000);
 	}
 }
 
@@ -53,7 +52,7 @@ void Simulation::run() {
 	noecho();
 	curs_set(0);
 
-	init_pair(1, COLOR_MAGENTA, COLOR_BLACK);
+	init_pair(1, COLOR_BLUE, COLOR_BLACK);
 	init_pair(2, COLOR_GREEN, COLOR_BLACK);
 
 	while(!met){
@@ -73,13 +72,11 @@ void Simulation::run() {
                 	a.move(maze);
         	}
 
-        	if(maze.areNeighbors(g.getPosition(), maze.getKey())){
-			g.resetVisited();
+        	if(g.getPosition() == maze.getKey()){
 			g.pickupKey();
 			maze.setTile(g.getPosition(), ' ');
         	}
-        	if(maze.areNeighbors(a.getPosition(), maze.getKey())){
-			a.resetVisited();
+        	if(a.getPosition() ==  maze.getKey()){
 			a.pickupKey();
 			maze.setTile(a.getPosition(), ' ');
         	}
@@ -132,13 +129,25 @@ void Simulation::run() {
 			}
 		}
 		displayTime(maze, rounds);
+		if(a.carriesKey()){
+			a.displayHasKey(maze);
+		}
+		if(g.carriesKey()){
+			g.displayHasKey(maze);
+		}
+		if(g.isTrapped()){
+			g.displayIsTrapped(maze);
+		}
+		if(a.isTrapped()){
+			a.displayIsTrapped(maze);
+		}
 
 		refresh();
-		usleep(100000);
+		usleep(200000);
 		rounds--;
 	}
 
-	destroyMaze(maze);   //Destroy the maze cinematically
+	destroyMaze(maze);
 
 	headToExit();
 	endwin();
@@ -146,13 +155,16 @@ void Simulation::run() {
 
 void Simulation::displayTime(const Maze& maze, unsigned int time) const {
 	attron(COLOR_PAIR(1));
-	mvprintw((maze.getHeight() / 2) - 1, maze.getWidth() + 20, "Time Remaining:");
-	mvprintw(maze.getHeight() / 2, maze.getWidth() + 20, "%d", time);
+	mvprintw(maze.getHeight() / 3, maze.getWidth() + 10, "|| TIME REMAINING ||: %d", time);
 	attroff(COLOR_PAIR(1));
 }
 
 void Simulation::gameOver(const Maze& maze) const {
 	attron(COLOR_PAIR(1));
-	mvprintw(maze.getHeight() + 2, maze.getWidth() / 2, "GAME OVER");
+   	mvprintw(maze.getHeight() / 2 - 2, maze.getWidth() + 5, " _________________________________________");
+    	mvprintw(maze.getHeight() / 2 - 1, maze.getWidth() + 5, "|  _               __     _        __  _  |");
+    	mvprintw(maze.getHeight() / 2, maze.getWidth() + 5, "| | _  /\\   /\\/\\  |_     / \\ \\  / |_  |_| |");
+    	mvprintw(maze.getHeight() / 2 + 1, maze.getWidth() + 5, "| |_| /--\\ /    \\ |__    \\_/  \\/  |__ | \\ |");
+    	mvprintw(maze.getHeight() / 2 + 2, maze.getWidth() + 5, "|_________________________________________|");
 	attroff(COLOR_PAIR(1));
 }

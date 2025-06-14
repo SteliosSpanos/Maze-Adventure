@@ -28,8 +28,16 @@ void Grigorakis::move(const Maze& maze) {
 		}
 	}
 	if(!neighbors.empty()){
-		Position next = neighbors[rand() % neighbors.size()];
-		moveToNext(next);
+		for(size_t i = 0; i < neighbors.size(); i++){
+			if(maze.isKey(neighbors[i])){
+				Position next = neighbors[i];
+				moveToNext(next);
+			}
+			else{
+				Position next = neighbors[rand() % neighbors.size()];
+				moveToNext(next);
+			}
+		}
 		setVisited(getPosition(), true);
 		pushPath(getPosition());
 	}
@@ -43,4 +51,16 @@ void Grigorakis::move(const Maze& maze) {
 			resetVisited();
 		}
 	}
+}
+
+void Grigorakis::displayHasKey(const Maze& maze) const {
+	attron(COLOR_PAIR(1));
+	mvprintw((maze.getHeight() / 3) + 1, maze.getWidth() + 10, "|| GRIGORAKIS HAS KEY ||");
+	attroff(COLOR_PAIR(1));
+}
+
+void Grigorakis::displayIsTrapped(const Maze& maze) const {
+	attron(COLOR_PAIR(1));
+	mvprintw((maze.getHeight() / 3) + 2, maze.getWidth() + 10, "|| GRIGORAKIS IS TRAPPED ||");
+	attroff(COLOR_PAIR(1));
 }

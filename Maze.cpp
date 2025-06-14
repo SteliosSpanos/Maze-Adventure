@@ -11,13 +11,13 @@ Maze::Maze(const std::string& filename) : trapUsed(false), trap2Used(false) {
         std::string line;
 	srand(time(nullptr));
 
-        while(std::getline(file, line)){    //Read maze from file
+        while(std::getline(file, line)){
         	maze.push_back(line);
         }
 	file.close();
 
-        rows = maze.size();     //Initialize columns and rows
-        cols = maze.empty() ? 0 : maze[0].size();
+        rows = (int)maze.size();
+        cols = maze.empty() ? 0 : (int)maze[0].size();
 
 	std::vector<Position> availablePos;
 	for(int y = 0; y < rows; y++){
@@ -28,28 +28,28 @@ Maze::Maze(const std::string& filename) : trapUsed(false), trap2Used(false) {
 		}
 	}
 
-	int keyIdx = rand() % availablePos.size();   //Initialize key
+	int keyIdx = rand() % availablePos.size();
 	setTile(availablePos[keyIdx], 'K');
 	key = availablePos[keyIdx];
 	availablePos.erase(availablePos.begin() + keyIdx);
 
-	int trapIdx = rand() % availablePos.size();   //Initialize traps
-	setTile(availablePos[trapIdx], 'C');
+	int trapIdx = rand() % availablePos.size();
+	setTile(availablePos[trapIdx], 'T');
 	trap = availablePos[trapIdx];
 	availablePos.erase(availablePos.begin() + trapIdx);
 
 	int trap2Idx = rand() % availablePos.size();
-	setTile(availablePos[trap2Idx], 'C');
+	setTile(availablePos[trap2Idx], 'T');
 	trap2 = availablePos[trap2Idx];
 	availablePos.erase(availablePos.begin() + trap2Idx);
 
-	int exitIdx = rand() % availablePos.size();   //Initialize exit
+	int exitIdx = rand() % availablePos.size();
 	setTile(availablePos[exitIdx], 'L');
 	exit = availablePos[exitIdx];
 }
 
 void Maze::drawMaze() const {
-	for(size_t y = 0; y < maze.size(); y++){
+	for(int y = 0; y < rows; y++){
 		attron(COLOR_PAIR(1));
 		mvprintw(y, 0, "%s", maze[y].c_str());
 		attroff(COLOR_PAIR(1));
@@ -57,17 +57,17 @@ void Maze::drawMaze() const {
 	refresh();
 }
 
-bool Maze::isValid(const Position& p) const {     //Function for checking the position
+bool Maze::isValid(const Position& p) const {
 	return p.y >= 0 && p.y < maze.size() && p.x >= 0 && p.x < maze[p.y].size();
 }
 
-void Maze::setTile(const Position& p, char ch) {    //Function for changing a tile
+void Maze::setTile(const Position& p, char ch) {
 	if(isValid(p)){
 		maze[p.y][p.x] = ch;
 	}
 }
 
-bool Maze::areNeighbors(const Position& p1, const Position& p2) const {    //Function to check if two tiles are neighbors
+bool Maze::areNeighbors(const Position& p1, const Position& p2) const {
 	return std::abs(p1.x - p2.x) <= 1 && std::abs(p1.y - p2.y) <= 1;
 }
 
@@ -109,9 +109,11 @@ bool Maze::isTrap(const Position& p) const {
 void Maze::useTrap(const Position& p) {
 	if(p == trap){
 		trapUsed = true;
+		setTile(p, 'C');
 	}
 	else if(p == trap2){
 		trap2Used = true;
+		setTile(p, 'C');
 	}
 }
 
